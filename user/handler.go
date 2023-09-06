@@ -2,6 +2,7 @@ package user
 
 import (
 	"bwastartup/helper"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -91,5 +92,37 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 
 	response := helper.ApiResponse(metaMsg, http.StatusOK, "success", data)
 
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.ApiResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	userId := "1"
+	path := fmt.Sprintf("images/%s-%s", userId, file.Filename)
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.ApiResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.service.SaveAvatar(userId, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.ApiResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true}
+	response := helper.ApiResponse("Successfully uploaded", http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, response)
 }
