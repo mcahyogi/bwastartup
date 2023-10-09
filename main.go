@@ -23,7 +23,7 @@ func main() {
 	db := db.SetupConnection()
 	r := gin.Default()
 
-	router.SetupRouterUser(r, db)
+	router.SetupRouter(r, db)
 	// conn := db.SetupConnection()
 	// fmt.Println("database connected!", conn)
 	// migration.RunMigration()

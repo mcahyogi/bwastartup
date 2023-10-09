@@ -3,6 +3,7 @@ package user
 import (
 	"bwastartup/auth"
 	"bwastartup/helper"
+	"bwastartup/model"
 	"fmt"
 	"net/http"
 
@@ -118,7 +119,8 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	userId := "1"
+	user := c.MustGet("currentUser").(model.User)
+	userId := user.Id
 	path := fmt.Sprintf("images/%s-%s", userId, file.Filename)
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
