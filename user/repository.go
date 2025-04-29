@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type Repository interface {
 	Save(user User) (User, error)
 	FindByEmail(email string) (User, error)
-	FindByID(ID int) (User, error)
+	FindByID(ID string) (User, error)
 	Update(user User) (User, error)
 }
 
@@ -34,7 +34,7 @@ func (r *repository) FindByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (r *repository) FindByID(ID int) (User, error) {
+func (r *repository) FindByID(ID string) (User, error) {
 	var user User
 	err := r.db.Where("ID = ?", ID).Find(&user).Error
 	if err != nil {
