@@ -46,6 +46,8 @@ func main() {
 	campaignHandler := handler.NewHandler(campaignService)
 
 	router := gin.Default()
+	// param 1 = path routingnya, param 2 = folder di project kita
+	router.Static("/images", "./images")
 
 	api := router.Group("/api/v1")
 
@@ -57,6 +59,7 @@ func main() {
 
 	// CAMPAIGN
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
+	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
 
 	router.Run(":8080")
 

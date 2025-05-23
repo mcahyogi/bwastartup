@@ -1,6 +1,9 @@
 package campaign
 
-import "time"
+import (
+	"bwastartup/user"
+	"time"
+)
 
 type Campaign struct {
 	ID               string `gorm:"type:uuid;primaryKey"`
@@ -16,13 +19,14 @@ type Campaign struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	CampaignImages   []CampaignImage
+	User             user.User
 }
 
 type CampaignImage struct {
 	ID         string `gorm:"type:uuid;primaryKey"`
 	CampaignID string
 	FileName   string
-	IsPrimary  bool
+	IsPrimary  int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
