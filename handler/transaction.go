@@ -1,0 +1,44 @@
+package handler
+
+import (
+	"bwastartup/helper"
+	"bwastartup/transaction"
+	"bwastartup/user"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type transactionHandler struct {
+	transactionService transaction.Service
+}
+
+func NewTransactionHandler(transactionService transaction.Service) *transactionHandler {
+	return &transactionHandler{transactionService}
+}
+
+func (h *transactionHandler) GetCampaignTransaction(c *gin.Context) {
+	var input transaction.GetCampaignTransactionInput
+
+	err := c.ShouldBindUri(&input)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Error to get campaign transaction", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	input.User = currentUser
+
+	campaignTransactions, err := h.transactionService.GetTransactionByCampaignID(input)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Error to get campaign transaction", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("List of campaign transaction", http.StatusOK, "success", transaction.FormatCampaignTransactions(campaignTransactions))
+	c.JSON(http.StatusOK, response)
+}
