@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	GetByCampaignID(campaignID string) ([]Transaction, error)
+	GetByUserID(userID string) ([]Transaction, error)
 }
 
 type repository struct {
@@ -24,4 +25,16 @@ func (r *repository) GetByCampaignID(campaignID string) ([]Transaction, error) {
 	}
 
 	return transaction, nil
+}
+
+func (r *repository) GetByUserID(userID string) ([]Transaction, error) {
+	var transactions []Transaction
+	// Param Preload ke-1 = relasi ke Campaign & relasi ke CampaignImages
+	// Param Preload ke-2 = kondisi di CampaignImages dengan nama CampaignImages di db yaitu campaign_images
+	err := r.db.Preload("Campaign.CampaignImages", "campaign_images.is_primary = 1").Where("user_id = ?", userID).Order("created_at desc").Find(&transactions).Error
+	if err != nil {
+		return transactions, err
+	}
+
+	return transactions, nil
 }
