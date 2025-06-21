@@ -3,11 +3,15 @@ package transaction
 import (
 	"bwastartup/campaign"
 	"errors"
+	"log"
+
+	"github.com/google/uuid"
 )
 
 type Service interface {
 	GetTransactionByCampaignID(input GetCampaignTransactionInput) ([]Transaction, error)
 	GetTransactionsByUserID(userID string) ([]Transaction, error)
+	CreateTransaction(input CreateTransactionInput) (Transaction, error)
 }
 
 type service struct {
@@ -44,4 +48,25 @@ func (s *service) GetTransactionsByUserID(userID string) ([]Transaction, error) 
 	}
 
 	return transactions, nil
+}
+
+func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, error) {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	transaction := Transaction{}
+	transaction.ID = uuid.String()
+	transaction.Amount = input.Amount
+	transaction.CampaignID = input.CampaignID
+	transaction.UserID = input.User.ID
+	transaction.Status = "pending"
+
+	newTransaction, err := s.repository.Save(transaction)
+	if err != nil {
+		return newTransaction, err
+	}
+
+	return newTransaction, nil
 }
