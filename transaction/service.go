@@ -2,6 +2,8 @@ package transaction
 
 import (
 	"bwastartup/campaign"
+	"bwastartup/payment"
+	"bwastartup/user"
 	"errors"
 	"log"
 
@@ -17,6 +19,7 @@ type Service interface {
 type service struct {
 	repository         Repository
 	campaignRepository campaign.Repository
+	// paymentService     payment.Service
 }
 
 func NewService(repository Repository, campaignRepository campaign.Repository) *service {
@@ -64,6 +67,26 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, 
 	transaction.Status = "pending"
 
 	newTransaction, err := s.repository.Save(transaction)
+	if err != nil {
+		return newTransaction, err
+	}
+
+	var paymentTrans = payment.Transaction{
+		ID:     newTransaction.ID,
+		Amount: int64(newTransaction.Amount),
+	}
+	var user = user.User{
+		Name:  input.User.Name,
+		Email: input.User.Email,
+	}
+	paymentURL, err := payment.NewService().GetPaymentURL(paymentTrans, user)
+	if err != nil {
+		return newTransaction, err
+	}
+
+	newTransaction.PaymentURL = paymentURL
+
+	newTransaction, err = s.repository.Update(newTransaction)
 	if err != nil {
 		return newTransaction, err
 	}

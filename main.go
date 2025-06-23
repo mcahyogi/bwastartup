@@ -35,6 +35,9 @@ func main() {
 	printNumber(3)
 	time.Sleep(1 * time.Second)
 
+	// Payment
+	// paymentService := payment.NewService()
+
 	// User
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
