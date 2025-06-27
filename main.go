@@ -5,6 +5,7 @@ import (
 	"bwastartup/campaign"
 	"bwastartup/handler"
 	"bwastartup/helper"
+	"bwastartup/payment"
 	"bwastartup/transaction"
 	"bwastartup/user"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -35,9 +37,6 @@ func main() {
 	printNumber(3)
 	time.Sleep(1 * time.Second)
 
-	// Payment
-	// paymentService := payment.NewService()
-
 	// User
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
@@ -48,7 +47,9 @@ func main() {
 
 	// Transaction
 	transactionRepository := transaction.NewRepository(db)
-	transactionService := transaction.NewService(transactionRepository, campaignRepository)
+	// Payment
+	paymentService := payment.NewService()
+	transactionService := transaction.NewService(transactionRepository, campaignRepository, paymentService)
 
 	authService := auth.NewService()
 
@@ -57,6 +58,7 @@ func main() {
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	router := gin.Default()
+	router.Use(cors.Default())
 	// param 1 = path routingnya, param 2 = folder di project kita
 	router.Static("/images", "./images")
 
